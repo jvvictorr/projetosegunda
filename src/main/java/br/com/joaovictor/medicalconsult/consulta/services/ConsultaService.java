@@ -16,7 +16,7 @@ public class ConsultaService {
     private ConsultaRepository consultaRepository;
 
     public Consulta cadastrarConsulta(Consulta consulta){
-        consulta.setIdconsulta(null);
+        consulta.setIdConsulta(null);
         return consultaRepository.save(consulta);
     }
 

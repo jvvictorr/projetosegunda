@@ -20,7 +20,7 @@ public class ConsultaResource {
     public ResponseEntity<Consulta> cadastrarConsulta(@RequestBody Consulta consulta){
         Consulta novaConsulta = consultaService.cadastrarConsulta(consulta);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
-                .buildAndExpand(novaConsulta.getIdconsulta()).toUri();
+                .buildAndExpand(novaConsulta.getIdConsulta()).toUri();
         return ResponseEntity.created(uri).body(novaConsulta);
     }
 

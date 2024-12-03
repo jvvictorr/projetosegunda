@@ -1,8 +1,5 @@
 package br.com.joaovictor.medicalconsult.config;
 
-
-
-import org.apache.catalina.filters.HttpHeaderSecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,18 +11,53 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final String[] PUBLIC_MATCHERS = {
+            "/h2-console/**",
+            "swagger-ui/**",
+            "/v3/api-docs/**"
+    };
+
+    private static final String[] PUBLIC_MATCHERS_GET = {
+            "/usuarios/**",
+            "/consultas/**"
+    };
+
+    private static final String[] PUBLIC_MATCHERS_POST = {
+            "/usuarios/**",
+            "/consultas/**"
+    };
+
+    private static final String[] PUBLIC_MATCHERS_PUT = {
+            "/usuarios/**",
+            "/consultas/**"
+    };
+
+    private static final String[] PUBLIC_MATCHERS_DELETE = {
+            "/usuarios/**",
+            "/consultas/**"
+    };
+
     @Bean
-    public SecurityFilterChain filterChain(HttpHeaderSecurityFilter http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
+                .headers(h -> h.frameOptions().disable())
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/usuarios").hasAnyRole("ADMIN", "SECRETARIO")
-                        .requestMatchers(HttpMethod.GET, "/usuarios").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/usuarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/usuarios").hasAnyRole("ADMIN", "SECRETARIO")
+                        .requestMatchers(HttpMethod.POST, PUBLIC_MATCHERS_POST).hasAnyRole("ADMIN", "SECRETARIO")
+                        .requestMatchers(HttpMethod.PUT, PUBLIC_MATCHERS_PUT).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, PUBLIC_MATCHERS_DELETE).hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, PUBLIC_MATCHERS_GET).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_MATCHERS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
@@ -39,34 +71,21 @@ public class SecurityConfig {
         auth.inMemoryAuthentication()
                 .withUser("JOAO").password(passwordEncoder.encode("12345")).roles("ADMIN")
                 .and()
-                .withUser("CALVIN").password(passwordEncoder.encode("98765")).roles("PACIENTE")
+                .withUser("RAFAEL").password(passwordEncoder.encode("98765")).roles("PACIENTE")
                 .and()
-                .withUser("Fernanda").password(passwordEncoder.encode("121212")).roles("SECRETARIA");
+                .withUser("CALVIN").password(passwordEncoder.encode("22222")).roles("SECRETARIO");
 
     }
-    private static final String[] PUBLIC_MATCHES = {
-            "/h2-console/",
-            "/swagger-ui/",
-            "/v3/api-docs/"
-    };
 
-    private static final String[] PUBLIC_MATCHES_GET = {
-            "/user/",
-            "/consult/"
-    };
-
-    private static final String[] PUBLIC_MATCHES_POST = {
-            "/user/",
-            "/consult/"
-    };
-
-    private static final String[] PUBLIC_MATCHES_PUT = {
-            "/user/",
-            "/consult/"
-    };
-
-    private static final String[] PUBLIC_MATCHES_DELETE = {
-            "/user/",
-            "/consult/"
-    };
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

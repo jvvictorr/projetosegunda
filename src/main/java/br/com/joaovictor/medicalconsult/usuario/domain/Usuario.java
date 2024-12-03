@@ -1,12 +1,13 @@
 package br.com.joaovictor.medicalconsult.usuario.domain;
 
+import br.com.joaovictor.medicalconsult.consulta.domain.Consulta;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
-@Getter
-@Setter
 @Data
 @Entity
 @Table(name = "USUARIOS")
@@ -25,20 +26,11 @@ public class Usuario {
     private String telefone;
     @Column(name = "DATA_NASCIMENTO")
     private Date dataNascimento;
-
     @Column(name = "PERMISSAO")
+    @Enumerated(EnumType.STRING)
     private Permissao permissao;
 
-    public Usuario() {
-    }
-
-    public Usuario(long idUsuario, String nomeUsuario, String email, String cpf, String telefone, Date dataNascimento, Permissao permissao) {
-        this.idUsuario = idUsuario;
-        this.nomeUsuario = nomeUsuario;
-        this.email = email;
-        this.cpf = cpf;
-        this.telefone = telefone;
-        this.dataNascimento = dataNascimento;
-        this.permissao = permissao;
-    }
+    @JsonIgnore
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Consulta> consultas;
 }
